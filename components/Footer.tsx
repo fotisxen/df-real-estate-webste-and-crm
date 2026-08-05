@@ -18,7 +18,7 @@ export default function Footer() {
         <div className="font-mono text-sm text-limestone/70">
           <p className="mb-2 uppercase tracking-wide text-limestone/40">{t("footer.contact")}</p>
           <p>info@df-real-estate.com</p>
-          <p>698 449 6660</p>
+          <p>6984 4966 60</p>
         </div>
         <div className="font-mono text-sm text-limestone/70">
           <p className="mb-2 uppercase tracking-wide text-limestone/40">{t("footer.office")}</p>
