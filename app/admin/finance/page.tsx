@@ -23,7 +23,7 @@ function monthLabel(key: string) {
 export default async function AdminFinancePage({
   searchParams,
 }: {
-  searchParams: { month?: string; type?: string };
+  searchParams: { month?: string; type?: string; year?: string };
 }) {
   const supabase = createClient();
   const { data } = await supabase
@@ -37,6 +37,7 @@ export default async function AdminFinancePage({
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const selectedMonth = searchParams.month ?? currentMonth;
   const selectedType = searchParams.type ?? "";
+  const selectedYear = Number(searchParams.year ?? selectedMonth.slice(0, 4));
 
   const filtered = all.filter((t) => {
     if (monthKey(t.transaction_date) !== selectedMonth) return false;
@@ -47,6 +48,15 @@ export default async function AdminFinancePage({
   const income = filtered.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
   const expense = filtered.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
   const net = income - expense;
+
+  const yearRows = all.filter((t) => {
+    if (Number(t.transaction_date.slice(0, 4)) !== selectedYear) return false;
+    if (selectedType && t.type !== selectedType) return false;
+    return true;
+  });
+  const yearIncome = yearRows.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const yearExpense = yearRows.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  const yearNet = yearIncome - yearExpense;
 
   // Last 6 months (including the selected one's context is irrelevant here —
   // this trend always ends at the current calendar month) for the mini chart.
@@ -74,7 +84,15 @@ export default async function AdminFinancePage({
   function typeHref(t: string) {
     const params = new URLSearchParams();
     params.set("month", selectedMonth);
+    params.set("year", String(selectedYear));
     if (t) params.set("type", t);
+    return `/admin/finance?${params.toString()}`;
+  }
+  function yearHref(year: number) {
+    const params = new URLSearchParams();
+    params.set("month", selectedMonth);
+    params.set("year", String(year));
+    if (selectedType) params.set("type", selectedType);
     return `/admin/finance?${params.toString()}`;
   }
 
@@ -118,6 +136,35 @@ export default async function AdminFinancePage({
         <div className="rounded-sm border border-ink/10 bg-limestone2 p-5">
           <p className="font-mono text-xs uppercase tracking-wide text-ink/50">Καθαρό Αποτέλεσμα</p>
           <p className={`mt-2 font-display text-2xl ${net >= 0 ? "text-aegean" : "text-clay"}`}>{formatEuro(net)}</p>
+        </div>
+      </div>
+
+      {/* Yearly totals */}
+      <div className="mt-10 rounded-sm border border-ink/10 bg-ink p-5 text-limestone">
+        <div className="flex items-center gap-4 font-mono text-xs uppercase tracking-wide">
+          <Link href={yearHref(selectedYear - 1)} className="rounded-full border border-limestone/20 px-3 py-1 hover:border-limestone">
+            ← {selectedYear - 1}
+          </Link>
+          <span>Σύνολο έτους {selectedYear}</span>
+          <Link href={yearHref(selectedYear + 1)} className="rounded-full border border-limestone/20 px-3 py-1 hover:border-limestone">
+            {selectedYear + 1} →
+          </Link>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-wide text-limestone/50">Έσοδα</p>
+            <p className="mt-1 font-display text-2xl text-limestone">{formatEuro(yearIncome)}</p>
+          </div>
+          <div>
+            <p className="font-mono text-xs uppercase tracking-wide text-limestone/50">Έξοδα</p>
+            <p className="mt-1 font-display text-2xl text-limestone">{formatEuro(yearExpense)}</p>
+          </div>
+          <div>
+            <p className="font-mono text-xs uppercase tracking-wide text-limestone/50">Καθαρό Αποτέλεσμα</p>
+            <p className={`mt-1 font-display text-2xl ${yearNet >= 0 ? "text-limestone" : "text-clay"}`}>
+              {formatEuro(yearNet)}
+            </p>
+          </div>
         </div>
       </div>
 
