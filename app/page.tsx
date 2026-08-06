@@ -1,5 +1,8 @@
+import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { propertyImageUrl } from "@/lib/storage";
+import { getAllArticles } from "@/lib/contentful";
 import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import Reveal from "@/components/Reveal";
@@ -11,33 +14,59 @@ export const revalidate = 60; // ISR: re-fetch at most once a minute
 export default async function HomePage() {
   const supabase = createClient();
 
-  const [{ data: featured }, { count: saleCount }, { count: rentCount }, { data: recentImagesRaw }] =
-    await Promise.all([
-      supabase
-        .from("properties")
-        .select("*")
-        .eq("status", "available")
-        .order("created_at", { ascending: false })
-        .limit(6),
-      supabase
-        .from("properties")
-        .select("id", { count: "exact", head: true })
-        .eq("listing_type", "sale")
-        .eq("status", "available"),
-      supabase
-        .from("properties")
-        .select("id", { count: "exact", head: true })
-        .eq("listing_type", "rent")
-        .eq("status", "available"),
-      supabase
-        .from("property_images")
-        .select("storage_path")
-        .order("created_at", { ascending: false })
-        .limit(8),
-    ]);
+  const [
+    { data: featured },
+    { count: saleCount },
+    { count: rentCount },
+    { data: recentImagesRaw },
+    { data: regionRows },
+    articles,
+  ] = await Promise.all([
+    supabase
+      .from("properties")
+      .select("*")
+      .eq("status", "available")
+      .order("created_at", { ascending: false })
+      .limit(9),
+    supabase
+      .from("properties")
+      .select("id", { count: "exact", head: true })
+      .eq("listing_type", "sale")
+      .eq("status", "available"),
+    supabase
+      .from("properties")
+      .select("id", { count: "exact", head: true })
+      .eq("listing_type", "rent")
+      .eq("status", "available"),
+    supabase
+      .from("property_images")
+      .select("storage_path")
+      .order("created_at", { ascending: false })
+      .limit(20),
+    supabase
+      .from("properties")
+      .select("region")
+      .eq("status", "available")
+      .eq("published", true)
+      .not("region", "is", null),
+    getAllArticles(),
+  ]);
 
   const properties = (featured ?? []) as Property[];
   const recentImages = (recentImagesRaw ?? []) as { storage_path: string }[];
+
+  const areaCounts = new Map<string, number>();
+  for (const row of (regionRows ?? []) as { region: string | null }[]) {
+    const region = row.region?.trim();
+    if (!region) continue;
+    areaCounts.set(region, (areaCounts.get(region) ?? 0) + 1);
+  }
+  const topAreas = Array.from(areaCounts.entries())
+    .map(([region, count]) => ({ region, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  const latestArticles = articles.slice(0, 3);
 
   // Cover image per property (first image by position), fetched in one
   // batched query instead of N+1 per card.
@@ -67,6 +96,28 @@ export default async function HomePage() {
         rentCount={rentCount ?? 0}
       />
 
+      <Reveal className="relative h-[60vh] min-h-[380px] w-full overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1657346088167-b982455bf29a?w=1600&q=80"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
+        <div className="container-content absolute inset-0 flex flex-col justify-end pb-16">
+          <p className="font-mono text-xs uppercase tracking-wide text-limestone/80">
+            <T k="home.mood1.kicker" />
+          </p>
+          <h2 className="mt-3 max-w-xl font-display text-3xl leading-snug text-limestone md:text-5xl">
+            <T k="home.mood1.title" />
+          </h2>
+          <p className="mt-4 max-w-md text-limestone/80">
+            <T k="home.mood1.subtitle" />
+          </p>
+        </div>
+      </Reveal>
+
       <section className="container-content py-16 md:py-24">
         <Reveal className="mb-10 flex items-end justify-between">
           <h2 className="text-3xl md:text-4xl">
@@ -95,6 +146,130 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      <section className="border-t border-ink/10 bg-limestone2/60">
+        <div className="container-content py-16 md:py-24">
+          <Reveal>
+            <h2 className="text-3xl md:text-4xl">
+              <T k="home.services.title" />
+            </h2>
+          </Reveal>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            {(
+              [
+                { href: "/valuation?purpose=sale", titleKey: "home.services.sell.title", descKey: "home.services.sell.desc" },
+                { href: "/valuation?purpose=rent", titleKey: "home.services.rent.title", descKey: "home.services.rent.desc" },
+                { href: "/valuation", titleKey: "home.services.valuation.title", descKey: "home.services.valuation.desc" },
+              ] as const
+            ).map((item, i) => (
+              <Reveal key={item.titleKey} delay={i * 0.08}>
+                <Link
+                  href={item.href}
+                  className="group block h-full rounded-sm border border-ink/10 bg-limestone p-6 transition-shadow hover:shadow-xl"
+                >
+                  <h3 className="font-display text-xl leading-snug">
+                    <T k={item.titleKey} />
+                  </h3>
+                  <p className="mt-2 text-sm text-ink/70">
+                    <T k={item.descKey} />
+                  </p>
+                  <span className="mt-4 block font-mono text-xs uppercase tracking-wide text-aegean transition-colors group-hover:text-clay">
+                    <T k="services.cta" />
+                  </span>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {topAreas.length > 0 && (
+        <section className="container-content py-16 md:py-24">
+          <Reveal className="mb-10 flex items-end justify-between">
+            <h2 className="text-3xl md:text-4xl">
+              <T k="home.areas.title" />
+            </h2>
+            <a href="/areas" className="font-mono text-xs uppercase tracking-wide text-clay hover:underline">
+              <T k="home.areas.viewAll" />
+            </a>
+          </Reveal>
+          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {topAreas.map((area, i) => (
+              <Reveal key={area.region} delay={Math.min(i, 5) * 0.06}>
+                <Link
+                  href={`/areas/${encodeURIComponent(area.region)}`}
+                  className="group block rounded-sm border border-ink/10 bg-limestone2 p-4 text-center transition-shadow hover:shadow-xl"
+                >
+                  <span className="block font-display text-lg leading-snug">{area.region}</span>
+                  <span className="mt-1 block font-mono text-xs uppercase tracking-wide text-ink/50">
+                    {area.count} <T k={area.count === 1 ? "areas.property" : "areas.properties"} />
+                  </span>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <Reveal className="relative h-[46vh] min-h-[320px] w-full overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1600&q=80"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-ink/50" />
+        <div className="container-content absolute inset-0 flex flex-col items-center justify-center text-center">
+          <h2 className="max-w-lg font-display text-3xl leading-snug text-limestone md:text-4xl">
+            <T k="home.mood2.title" />
+          </h2>
+          <p className="mt-4 max-w-sm text-limestone/80">
+            <T k="home.mood2.subtitle" />
+          </p>
+          <Link
+            href="/contact"
+            className="mt-8 rounded-full bg-limestone px-8 py-3 font-mono text-xs uppercase tracking-wide text-ink transition-colors hover:bg-clay hover:text-limestone"
+          >
+            <T k="home.mood2.cta" />
+          </Link>
+        </div>
+      </Reveal>
+
+      {latestArticles.length > 0 && (
+        <section className="border-t border-ink/10 bg-limestone2/60">
+          <div className="container-content py-16 md:py-24">
+            <Reveal className="mb-10 flex items-end justify-between">
+              <h2 className="text-3xl md:text-4xl">
+                <T k="home.blog.title" />
+              </h2>
+              <a href="/blog" className="font-mono text-xs uppercase tracking-wide text-clay hover:underline">
+                <T k="home.blog.viewAll" />
+              </a>
+            </Reveal>
+            <div className="grid gap-6 sm:grid-cols-3">
+              {latestArticles.map((article, i) => (
+                <Reveal key={article.slug} delay={i * 0.08}>
+                  <Link
+                    href={`/blog/${article.slug}`}
+                    className="group block h-full rounded-sm border border-ink/10 bg-limestone p-6 transition-shadow hover:shadow-xl"
+                  >
+                    {article.category && (
+                      <p className="font-mono text-[11px] uppercase tracking-wide text-olive">
+                        {article.category}
+                      </p>
+                    )}
+                    <h3 className="mt-1 font-display text-xl leading-snug">{article.title}</h3>
+                    {article.excerpt && (
+                      <p className="mt-2 line-clamp-2 text-sm text-ink/70">{article.excerpt}</p>
+                    )}
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }

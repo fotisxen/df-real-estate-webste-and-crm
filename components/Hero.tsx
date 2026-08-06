@@ -51,7 +51,7 @@ export default function Hero({ filmstripImages, saleCount, rentCount }: HeroProp
           className="mt-4 max-w-3xl text-5xl leading-[1.05] tracking-tightest md:text-7xl"
         >
           {t("hero.title.pre")}
-          <em className="font-normal italic text-aegean">{t("hero.title.em")}</em>
+          <em className="font-normal italic text-aegean">{t("hero.title.em")}</em>{" "}
           {t("hero.title.post")}
         </motion.h1>
 
@@ -73,7 +73,7 @@ export default function Hero({ filmstripImages, saleCount, rentCount }: HeroProp
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.4 }}
-        className="relative h-[34vh] min-h-[220px] w-full bg-aegean md:h-[42vh]"
+        className="relative h-[42vh] min-h-[280px] w-full bg-aegean md:h-[60vh]"
       >
         {hasImages ? (
           <motion.div
@@ -83,12 +83,12 @@ export default function Hero({ filmstripImages, saleCount, rentCount }: HeroProp
             className="flex h-full w-[200%]"
           >
             {[...filmstripImages, ...filmstripImages].map((src, i) => (
-              <div key={i} className="relative h-full w-[220px] shrink-0 md:w-[320px]">
+              <div key={i} className="relative h-full w-[280px] shrink-0 md:w-[440px]">
                 <Image
                   src={src}
                   alt=""
                   fill
-                  sizes="320px"
+                  sizes="440px"
                   className="object-cover grayscale-[15%]"
                   priority={i < 4}
                 />

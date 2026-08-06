@@ -45,7 +45,7 @@ export default function Nav() {
           </span>
           <span className="font-display text-xl tracking-tightest">DF Real Estate</span>
         </Link>
-        <nav className="hidden gap-8 font-mono text-xs uppercase tracking-wide md:flex">
+        <nav className="hidden gap-6 font-mono text-xs uppercase tracking-wide lg:flex">
           <Link href="/properties?listing_type=sale" className="hover:text-clay transition-colors">
             {t("nav.sale")}
           </Link>
@@ -54,6 +54,12 @@ export default function Nav() {
           </Link>
           <Link href="/properties" className="hover:text-clay transition-colors">
             {t("nav.all")}
+          </Link>
+          <Link href="/areas" className="hover:text-clay transition-colors">
+            {t("nav.areas")}
+          </Link>
+          <Link href="/services" className="hover:text-clay transition-colors">
+            {t("nav.services")}
           </Link>
           <Link href="/blog" className="hover:text-clay transition-colors">
             {t("nav.blog")}

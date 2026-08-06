@@ -1,0 +1,21 @@
+{
+  "name": "DF Real Estate",
+  "short_name": "DF Real Estate",
+  "description": "Σπίτια, γραφεία και επαγγελματικοί χώροι προς πώληση και ενοικίαση στη Θεσσαλονίκη.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2EEE4",
+  "theme_color": "#1C1A17",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

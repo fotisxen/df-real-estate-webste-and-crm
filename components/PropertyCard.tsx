@@ -35,7 +35,7 @@ export default function PropertyCard({
       href={`/properties/${property.slug}`}
       className="group block overflow-hidden rounded-sm bg-limestone2 transition-shadow hover:shadow-xl"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-ink/10">
+      <div className="relative aspect-[4/5] overflow-hidden bg-ink/10">
         {coverImageUrl ? (
           <Image
             src={coverImageUrl}

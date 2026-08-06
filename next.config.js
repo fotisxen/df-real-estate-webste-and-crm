@@ -13,6 +13,11 @@ const nextConfig = {
         // Contentful asset CDN, used by the blog cover images.
         hostname: "images.ctfassets.net",
       },
+      {
+        protocol: "https",
+        // Editorial stock photography for brand/mood imagery on the homepage.
+        hostname: "images.unsplash.com",
+      },
     ],
   },
 };
