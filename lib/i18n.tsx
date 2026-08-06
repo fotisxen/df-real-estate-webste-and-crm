@@ -13,6 +13,7 @@ const STRINGS: Record<string, Record<Lang, string>> = {
   "nav.sale": { el: "Πώληση", en: "Sale" },
   "nav.rent": { el: "Ενοικίαση", en: "Rent" },
   "nav.all": { el: "Όλα τα ακίνητα", en: "All properties" },
+  "nav.blog": { el: "Άρθρα", en: "Blog" },
   "nav.contact": { el: "Επικοινωνία", en: "Contact" },
   "nav.admin": { el: "Διαχείριση", en: "Admin" },
 
@@ -74,6 +75,20 @@ const STRINGS: Record<string, Record<Lang, string>> = {
   "contact.success": { el: "Ευχαριστούμε! Θα επικοινωνήσουμε σύντομα μαζί σας.", en: "Thank you! We'll be in touch shortly." },
   "contact.error": { el: "Κάτι πήγε στραβά. Δοκιμάστε ξανά ή καλέστε μας.", en: "Something went wrong. Please try again or call us." },
   "contact.requestInfo": { el: "Ζητήστε πληροφορίες", en: "Request info" },
+
+  "blog.kicker": { el: "Οδηγοί & νέα", en: "Guides & news" },
+  "blog.title": { el: "Άρθρα για ακίνητα", en: "Real estate articles" },
+  "blog.subtitle": {
+    el: "Συμβουλές, οδηγοί και νέα για αγορά, πώληση και ενοικίαση ακινήτων στη Θεσσαλονίκη.",
+    en: "Tips, guides and news on buying, selling and renting property in Thessaloniki.",
+  },
+  "blog.empty": { el: "Δεν υπάρχουν ακόμη άρθρα.", en: "No articles yet." },
+  "blog.back": { el: "← Άρθρα", en: "← Blog" },
+  "blog.cta.title": { el: "Ψάχνετε το επόμενο ακίνητό σας;", en: "Looking for your next property?" },
+  "blog.cta.subtitle": {
+    el: "Επικοινωνήστε μαζί μας — απαντάμε συνήθως εντός της ίδιας ημέρας.",
+    en: "Get in touch — we usually reply the same day.",
+  },
 };
 
 interface LanguageContextValue {

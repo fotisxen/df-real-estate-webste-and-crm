@@ -55,6 +55,9 @@ export default function Nav() {
           <Link href="/properties" className="hover:text-clay transition-colors">
             {t("nav.all")}
           </Link>
+          <Link href="/blog" className="hover:text-clay transition-colors">
+            {t("nav.blog")}
+          </Link>
         </nav>
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
