@@ -224,3 +224,39 @@ drop trigger if exists property_private_details_set_updated_at on property_priva
 create trigger property_private_details_set_updated_at
   before update on property_private_details
   for each row execute procedure set_updated_at();
+
+-- ---------------------------------------------------------------------
+-- Transactions — simple income/expense ledger for the agency's own
+-- finances (commissions earned, marketing spend, office costs, ...).
+-- PRIVATE, same as clients: no public policy at all.
+-- ---------------------------------------------------------------------
+create table if not exists transactions (
+  id uuid primary key default gen_random_uuid(),
+  type text not null check (type in ('income','expense')),
+  category text not null,
+  amount numeric(12,2) not null check (amount > 0),
+  transaction_date date not null default current_date,
+  description text,
+  property_id uuid references properties(id) on delete set null,
+  client_id uuid references clients(id) on delete set null,
+  agent_id uuid references agents(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists transactions_date_idx on transactions(transaction_date desc);
+create index if not exists transactions_type_idx on transactions(type);
+create index if not exists transactions_property_id_idx on transactions(property_id);
+create index if not exists transactions_client_id_idx on transactions(client_id);
+
+alter table transactions enable row level security;
+
+drop policy if exists "only agents can read transactions" on transactions;
+create policy "only agents can read transactions"
+  on transactions for select
+  using (auth.role() = 'authenticated');
+
+drop policy if exists "only agents can modify transactions" on transactions;
+create policy "only agents can modify transactions"
+  on transactions for all
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');

@@ -30,6 +30,9 @@ export default function AdminNav() {
           <Link href="/admin/clients" className="hover:text-clay">
             Πελάτες
           </Link>
+          <Link href="/admin/finance" className="hover:text-clay">
+            Οικονομικά
+          </Link>
         </div>
         <button onClick={handleSignOut} className="hover:text-clay">
           Αποσύνδεση

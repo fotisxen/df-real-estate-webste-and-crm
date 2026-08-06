@@ -29,6 +29,7 @@ const STRINGS: Record<string, Record<Lang, string>> = {
   "footer.office": { el: "Γραφείο", en: "Office" },
   "footer.city": { el: "Θεσσαλονίκη, Ελλάδα", en: "Thessaloniki, Greece" },
   "footer.rights": { el: "Με επιφύλαξη παντός δικαιώματος.", en: "All rights reserved." },
+  "footer.madeBy": { el: "Κατασκευή από", en: "Made by" },
 
   "hero.kicker": { el: "Θεσσαλονίκη & γύρω περιοχές", en: "Thessaloniki & surrounding areas" },
   "hero.title.pre": { el: "Ακίνητα που ", en: "Properties worth " },

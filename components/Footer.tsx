@@ -51,8 +51,21 @@ export default function Footer() {
           </ul>
         </div>
       </div>
-      <div className="container-content border-t border-limestone/10 py-6 text-xs text-limestone/40">
-        © {new Date().getFullYear()} DF Real Estate. {t("footer.rights")}
+      <div className="container-content flex flex-wrap items-center justify-between gap-2 border-t border-limestone/10 py-6 text-xs text-limestone/40">
+        <span>
+          © {new Date().getFullYear()} DF Real Estate. {t("footer.rights")}
+        </span>
+        <span>
+          {t("footer.madeBy")}{" "}
+          <a
+            href="https://opensite.gr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-limestone/60 transition-colors hover:text-limestone"
+          >
+            OpenSite
+          </a>
+        </span>
       </div>
     </footer>
   );

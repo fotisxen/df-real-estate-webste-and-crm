@@ -79,6 +79,21 @@ export interface Client {
   created_at: string;
 }
 
+export type TransactionType = "income" | "expense";
+
+export interface Transaction {
+  id: string;
+  type: TransactionType;
+  category: string;
+  amount: number;
+  transaction_date: string;
+  description: string | null;
+  property_id: string | null;
+  client_id: string | null;
+  agent_id: string | null;
+  created_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -106,6 +121,11 @@ export interface Database {
         Row: Client;
         Insert: Partial<Client> & Pick<Client, "full_name">;
         Update: Partial<Client>;
+      };
+      transactions: {
+        Row: Transaction;
+        Insert: Partial<Transaction> & Pick<Transaction, "type" | "category" | "amount">;
+        Update: Partial<Transaction>;
       };
     };
     Views: Record<string, never>;
