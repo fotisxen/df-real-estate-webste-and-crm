@@ -38,14 +38,14 @@ const SERVICES = [
       en: "We find reliable tenants for your property, or the right rental for you, with clear lease terms from day one.",
     },
   },
-  {
-    href: "/contact",
-    title: { el: "Διαχείριση Ακινήτου", en: "Property Management" },
-    description: {
-      el: "Αναλαμβάνουμε την καθημερινή διαχείριση του ακινήτου σας — επικοινωνία με ενοικιαστές, είσπραξη ενοικίων και συντονισμό συντήρησης.",
-      en: "We take on the day-to-day management of your property — tenant communication, rent collection and maintenance coordination.",
-    },
-  },
+  // {
+  //   href: "/contact",
+  //   title: { el: "Διαχείριση Ακινήτου", en: "Property Management" },
+  //   description: {
+  //     el: "Αναλαμβάνουμε την καθημερινή διαχείριση του ακινήτου σας — επικοινωνία με ενοικιαστές, είσπραξη ενοικίων και συντονισμό συντήρησης.",
+  //     en: "We take on the day-to-day management of your property — tenant communication, rent collection and maintenance coordination.",
+  //   },
+  // },
   {
     href: "/valuation",
     title: { el: "Εκτίμηση Ακινήτου", en: "Property Valuation" },

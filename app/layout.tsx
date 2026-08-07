@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     template: "%s | DF Real Estate",
   },
   description:
-    "Σπίτια, γραφεία και επαγγελματικοί χώροι προς πώληση και ενοικίαση.",
+    "Κατοικίες, γραφεία και επαγγελματικοί χώροι προς πώληση και ενοικίαση.",
   openGraph: {
     type: "website",
     locale: "el_GR",

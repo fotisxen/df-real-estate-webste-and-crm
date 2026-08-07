@@ -36,7 +36,7 @@ const STRINGS: Record<string, Record<Lang, string>> = {
   "hero.title.em": { el: "αξίζουν", en: "the" },
   "hero.title.post": { el: " τη διαδρομή.", en: " journey." },
   "hero.subtitle": {
-    el: "Σπίτια, γραφεία και επαγγελματικοί χώροι προς πώληση και ενοικίαση, επιλεγμένα και ενημερωμένα από την ομάδα μας — όχι από bot.",
+    el: "Κατοικίες, γραφεία και επαγγελματικοί χώροι προς πώληση και ενοικίαση, επιλεγμένα και ενημερωμένα από την ομάδα μας — όχι από bot.",
     en: "Homes, offices and commercial spaces for sale and rent, curated and kept up to date by our team — not a bot.",
   },
   "hero.forSale": { el: "προς πώληση", en: "for sale" },
@@ -63,7 +63,7 @@ const STRINGS: Record<string, Record<Lang, string>> = {
 
   "home.services.title": { el: "Πώς μπορούμε να βοηθήσουμε", en: "How we can help" },
   "home.services.sell.title": { el: "Θέλω να πουλήσω", en: "I want to sell" },
-  "home.services.sell.desc": { el: "Σωστή τιμολόγηση και προβολή για γρήγορη, ασφαλή πώληση.", en: "Correct pricing and exposure for a fast, secure sale." },
+  "home.services.sell.desc": { el: "Σωστή εκτίμηση και προβολή για γρήγορη, ασφαλή πώληση.", en: "Correct pricing and exposure for a fast, secure sale." },
   "home.services.rent.title": { el: "Θέλω να ενοικιάσω", en: "I want to rent out" },
   "home.services.rent.desc": { el: "Βρίσκουμε αξιόπιστους ενοικιαστές με σαφείς όρους μίσθωσης.", en: "We find reliable tenants with clear lease terms." },
   "home.services.valuation.title": { el: "Θέλω δωρεάν εκτίμηση", en: "I want a free valuation" },
