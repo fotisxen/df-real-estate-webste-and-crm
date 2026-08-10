@@ -11,6 +11,21 @@ import type { Property } from "@/types/database";
 
 export const revalidate = 60; // ISR: re-fetch at most once a minute
 
+// Curated mood imagery for the hero filmstrip — deliberately not photos of
+// our own listings. Houses, interiors, and gardens from Unsplash (free to
+// use), swapped for a fresh set whenever the vibe needs refreshing.
+const MOOD_FILMSTRIP = [
+  "https://images.unsplash.com/photo-1657346088167-b982455bf29a?w=800&q=75",
+  "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&q=75",
+  "https://images.unsplash.com/photo-1660361338517-8c8fbb3ac264?w=800&q=75",
+  "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=800&q=75",
+  "https://images.unsplash.com/photo-1718893389568-22a2a039998c?w=800&q=75",
+  "https://images.unsplash.com/photo-1632829882891-5047ccc421bc?w=800&q=75",
+  "https://images.unsplash.com/photo-1703783028657-5905a1662aa8?w=800&q=75",
+  "https://images.unsplash.com/photo-1633505899118-4ca6bd143043?w=800&q=75",
+  "https://images.unsplash.com/photo-1667238002143-b5e117168e98?w=800&q=75",
+];
+
 export default async function HomePage() {
   const supabase = createClient();
 
@@ -18,7 +33,6 @@ export default async function HomePage() {
     { data: featured },
     { count: saleCount },
     { count: rentCount },
-    { data: recentImagesRaw },
     { data: regionRows },
     articles,
   ] = await Promise.all([
@@ -39,11 +53,6 @@ export default async function HomePage() {
       .eq("listing_type", "rent")
       .eq("status", "available"),
     supabase
-      .from("property_images")
-      .select("storage_path")
-      .order("created_at", { ascending: false })
-      .limit(20),
-    supabase
       .from("properties")
       .select("region")
       .eq("status", "available")
@@ -53,7 +62,6 @@ export default async function HomePage() {
   ]);
 
   const properties = (featured ?? []) as Property[];
-  const recentImages = (recentImagesRaw ?? []) as { storage_path: string }[];
 
   const areaCounts = new Map<string, number>();
   for (const row of (regionRows ?? []) as { region: string | null }[]) {
@@ -86,12 +94,10 @@ export default async function HomePage() {
     }
   }
 
-  const filmstripImages = (recentImages ?? []).map((i) => propertyImageUrl(i.storage_path));
-
   return (
     <>
       <Hero
-        filmstripImages={filmstripImages}
+        filmstripImages={MOOD_FILMSTRIP}
         saleCount={saleCount ?? 0}
         rentCount={rentCount ?? 0}
       />

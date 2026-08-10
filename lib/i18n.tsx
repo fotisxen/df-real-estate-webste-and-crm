@@ -21,7 +21,7 @@ const STRINGS: Record<string, Record<Lang, string>> = {
   "nav.admin": { el: "Διαχείριση", en: "Admin" },
 
   "footer.tagline": {
-    el: "Μεσιτικό γραφείο — σπίτια, γραφεία και επαγγελματικοί χώροι.",
+    el: "Μεσιτικό γραφείο — κατοικίες, γραφεία και επαγγελματικοί χώροι.",
     en: "Real estate agency — homes, offices and commercial spaces.",
   },
   "footer.contact": { el: "Επικοινωνία", en: "Contact" },
