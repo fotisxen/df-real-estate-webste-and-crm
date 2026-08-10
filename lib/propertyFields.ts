@@ -79,7 +79,9 @@ export function subcategoriesFor(category: string) {
   return CATEGORIES.find((c) => c.value === category)?.subcategories ?? [];
 }
 
-export const ENERGY_CLASSES = ["A+", "A", "B+", "B", "Γ", "Δ", "Ε", "Ζ", "Η"].map((v) => ({ value: v, label: v }));
+export const ENERGY_CLASSES = ["A+", "A", "B+", "B", "Γ", "Δ", "Ε", "Ζ", "Η", "Εξαιρείται από την υποχρεωτική έκδοση ΠΕΑ"].map(
+  (v) => ({ value: v, label: v }),
+);
 
 export const ZONE_OPTIONS = [
   { value: "residential", label: "Οικιστική" },
@@ -89,13 +91,85 @@ export const ZONE_OPTIONS = [
   { value: "out_of_plan", label: "Εκτός σχεδίου / Υπό ανάπλαση" },
 ];
 
+export const FLOOR_OPTIONS = [
+  "Υπόγειο",
+  "Ημιυπόγειο",
+  "Ισόγειο",
+  "Ημιόροφος",
+  "1ος",
+  "2ος",
+  "3ος",
+  "4ος",
+  "5ος",
+  "6ος",
+  "7ος",
+  "8ος",
+  "9ος",
+].map((v) => ({ value: v, label: v }));
+
+export const WINDOW_FRAME_OPTIONS = [
+  "Ξύλινα",
+  "Αλουμινίου",
+  "Συνθετικά",
+  "Ξύλινα - Αλουμινίου",
+  "Ξύλινα - Συνθετικά",
+  "Αλουμινίου - Συνθετικά",
+].map((v) => ({ value: v, label: v }));
+
+export const GLASS_TYPE_OPTIONS = ["Μονός υαλοπίνακας", "Διπλός υαλοπίνακας", "Τριπλός υαλοπίνακας"].map((v) => ({
+  value: v,
+  label: v,
+}));
+
+export const FLOOR_TYPE_OPTIONS = [
+  "Μάρμαρο",
+  "Ξύλο",
+  "Πέτρα",
+  "Πλακάκι",
+  "Μωσαϊκό",
+  "Μάρμαρο - Ξύλο",
+  "Μάρμαρο - Πλακάκι",
+  "Πέτρα - Ξύλο",
+  "Πέτρα - Μάρμαρο",
+  "Πλακάκι - Ξύλο",
+  "Μωσαϊκό - Ξύλο",
+  "Βιομηχανικό δάπεδο",
+  "Laminate δάπεδα",
+  "Δάπεδο βινυλίου",
+].map((v) => ({ value: v, label: v }));
+
+export const ORIENTATION_OPTIONS = [
+  "Ανατολικός",
+  "Ανατολικοδυτικός",
+  "Ανατολικομεσημβρινός",
+  "Βόρειος",
+  "Βορειοανατολικός",
+  "Βορειοδυτικός",
+  "Δυτικός",
+  "Δυτικομεσημβρινός",
+  "Μεσημβρινός",
+  "Νότιος",
+  "Νοτιοανατολικός",
+  "Νοτιοδυτικός",
+].map((v) => ({ value: v, label: v }));
+
+export const ACCESS_FROM_OPTIONS = [
+  "Άσφαλτο",
+  "Πεζόδρομο",
+  "Πλακόστρωτο",
+  "Χωματόδρομο",
+  "Δεν υπάρχει πρόσβαση",
+  "Θάλασσα",
+  "Άλλο",
+].map((v) => ({ value: v, label: v }));
+
 export const DETAIL_GROUPS: DetailGroup[] = [
   {
     title: "Χώροι",
     fields: [
-      { key: "floor", label: "Όροφος", type: "text" },
-      { key: "levels", label: "Επίπεδα", type: "number" },
       { key: "wc", label: "WC", type: "number" },
+      { key: "floor", label: "Όροφος", type: "select", options: FLOOR_OPTIONS },
+      { key: "levels", label: "Επίπεδα", type: "number" },
       { key: "kitchens", label: "Κουζίνες", type: "number" },
       { key: "living_rooms", label: "Σαλόνια", type: "number" },
       { key: "storage_room", label: "Αποθήκη", type: "boolean" },
@@ -138,8 +212,8 @@ export const DETAIL_GROUPS: DetailGroup[] = [
       { key: "alarm", label: "Συναγερμός", type: "boolean" },
       { key: "painted", label: "Βαμμένο", type: "boolean" },
       { key: "furnished", label: "Επιπλωμένο", type: "boolean" },
-      { key: "window_frames", label: "Κουφώματα", type: "text" },
-      { key: "glass_type", label: "Τύποι υαλοπινάκων", type: "text" },
+      { key: "window_frames", label: "Κουφώματα", type: "select", options: WINDOW_FRAME_OPTIONS },
+      { key: "glass_type", label: "Τύποι υαλοπινάκων", type: "select", options: GLASS_TYPE_OPTIONS },
       { key: "screens", label: "Σίτες", type: "boolean" },
       { key: "fireplace", label: "Τζάκι", type: "boolean" },
       { key: "bright", label: "Φωτεινό", type: "boolean" },
@@ -147,7 +221,7 @@ export const DETAIL_GROUPS: DetailGroup[] = [
       { key: "luxurious", label: "Πολυτελές", type: "boolean" },
       { key: "ev_charging", label: "Φόρτιση ηλεκτρικών αυτοκινήτων", type: "boolean" },
       { key: "doorman", label: "Υποδοχή με θυρωρό", type: "boolean" },
-      { key: "floor_type", label: "Τύπος δαπέδων", type: "text" },
+      { key: "floor_type", label: "Τύπος δαπέδων", type: "select", options: FLOOR_TYPE_OPTIONS },
       { key: "satellite_dish", label: "Δορυφορική κεραία", type: "boolean" },
     ],
   },
@@ -160,14 +234,15 @@ export const DETAIL_GROUPS: DetailGroup[] = [
       { key: "garden", label: "Κήπος", type: "boolean" },
       { key: "pool", label: "Πισίνα", type: "boolean" },
       { key: "view", label: "Θέα", type: "boolean" },
-      { key: "orientation", label: "Προσανατολισμός", type: "text" },
-      { key: "quiet", label: "Φωνιακό", type: "boolean" },
+      { key: "orientation", label: "Προσανατολισμός", type: "select", options: ORIENTATION_OPTIONS },
+      { key: "quiet", label: "Γωνιακό", type: "boolean" },
       { key: "front_facing", label: "Προσόψεως", type: "boolean" },
       { key: "zone", label: "Ζώνη", type: "select", options: ZONE_OPTIONS },
       { key: "disabled_access", label: "Πρόσβαση ΑΜΕΑ", type: "boolean" },
       { key: "semi_basement", label: "Υπόσκαφο", type: "boolean" },
       { key: "distance_from_sea_m", label: "Απόσταση από θάλασσα", type: "number", unit: "m" },
       { key: "parking", label: "Στάθμευση", type: "boolean" },
+      { key: "access_from", label: "Πρόσβαση από", type: "select", options: ACCESS_FROM_OPTIONS },
     ],
   },
   {

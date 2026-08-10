@@ -207,6 +207,11 @@ create table if not exists property_private_details (
   updated_at timestamptz not null default now()
 );
 
+-- The real/exact address (as opposed to `properties.address`, which is the
+-- approximate address shown to the public — same privacy split as
+-- `internal_notes`, never exposed by the public properties select policy).
+alter table property_private_details add column if not exists real_address text;
+
 alter table property_private_details enable row level security;
 
 drop policy if exists "only agents can read property private details" on property_private_details;

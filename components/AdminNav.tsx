@@ -19,8 +19,8 @@ export default function AdminNav() {
 
   return (
     <div className="border-b border-ink/10 bg-ink text-limestone">
-      <div className="container-content flex items-center justify-between py-4 font-mono text-xs uppercase tracking-wide">
-        <div className="flex gap-6">
+      <div className="container-content flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4 font-mono text-xs uppercase tracking-wide">
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
           <Link href="/admin/properties" className="hover:text-clay">
             Ακίνητα
           </Link>

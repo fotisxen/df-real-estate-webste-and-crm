@@ -141,15 +141,28 @@ export default async function PropertyPage({ params }: { params: { slug: string 
 
           {DETAIL_GROUPS.map((group) => {
             const entries = group.fields.filter((f) => hasValue(property.details?.[f.key]));
-            if (entries.length === 0) return null;
+            const isSpacesGroup = group.title === "Χώροι";
+            const coreEntries = isSpacesGroup
+              ? [
+                  ...(hasValue(property.bedrooms) ? [{ key: "__bedrooms", label: "Υπνοδωμάτια", value: String(property.bedrooms) }] : []),
+                  ...(hasValue(property.bathrooms) ? [{ key: "__bathrooms", label: "Μπάνια", value: String(property.bathrooms) }] : []),
+                ]
+              : [];
+            if (entries.length === 0 && coreEntries.length === 0) return null;
             return (
               <Reveal key={group.title} className="mt-8 border-t border-ink/10 pt-6">
                 <h2 className="font-mono text-xs uppercase tracking-wide text-clay">{group.title}</h2>
-                <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 font-mono text-sm text-ink/70 sm:grid-cols-3">
+                <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-sm text-ink/70 sm:grid-cols-3">
+                  {coreEntries.map((f) => (
+                    <div key={f.key} className="flex items-baseline gap-2">
+                      <dt className="shrink-0">{f.label}:</dt>
+                      <dd className="text-ink">{f.value}</dd>
+                    </div>
+                  ))}
                   {entries.map((f) => (
-                    <div key={f.key} className="flex justify-between gap-2">
-                      <dt>{f.label}</dt>
-                      <dd>
+                    <div key={f.key} className="flex items-baseline gap-2">
+                      <dt className="shrink-0">{f.label}:</dt>
+                      <dd className="text-ink">
                         {fieldValueLabel(property.details[f.key])}
                         {f.unit && property.details[f.key] !== true ? ` ${f.unit}` : ""}
                       </dd>

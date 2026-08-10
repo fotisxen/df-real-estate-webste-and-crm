@@ -28,6 +28,8 @@ export interface Property {
   available_from: string | null;
   currently_rented: boolean;
   code: string | null;
+  // Public/displayed address — may be approximate. The exact address lives
+  // privately on PropertyPrivateDetails.real_address instead.
   address: string | null;
   region: string | null;
   municipality: string | null;
@@ -47,6 +49,9 @@ export interface PropertyPrivateDetails {
   property_id: string;
   owner_client_id: string | null;
   internal_notes: string | null;
+  // The real/exact address. `properties.address` (public) is the address
+  // shown to visitors — this one is for the office only.
+  real_address: string | null;
   updated_at: string;
 }
 

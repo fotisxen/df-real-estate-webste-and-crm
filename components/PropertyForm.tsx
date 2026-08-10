@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { propertyImageUrl } from "@/lib/storage";
 import { CATEGORIES, DETAIL_GROUPS, subcategoriesFor, type DetailFieldDef } from "@/lib/propertyFields";
+import { regionNames, municipalitiesFor, neighborhoodsFor } from "@/lib/geography";
 import type { Property, PropertyImage, PropertyPrivateDetails } from "@/types/database";
 import Image from "next/image";
 
@@ -80,7 +81,12 @@ export default function PropertyForm({
   const [files, setFiles] = useState<FileList | null>(null);
   const [category, setCategory] = useState(property?.category ?? "");
   const [existingImages, setExistingImages] = useState(images ?? []);
+  const [region, setRegion] = useState(property?.region ?? "");
+  const [municipality, setMunicipality] = useState(property?.municipality ?? "");
   const details = property?.details ?? {};
+
+  const municipalityOptions = municipalitiesFor(region);
+  const neighborhoodOptions = neighborhoodsFor(region, municipality);
 
   async function handleDeleteImage(img: PropertyImage) {
     const supabase = createClient();
@@ -162,9 +168,13 @@ export default function PropertyForm({
 
     const ownerClientId = String(form.get("owner_client_id") ?? "") || null;
     const internalNotes = String(form.get("internal_notes") ?? "") || null;
-    await supabase
-      .from("property_private_details")
-      .upsert({ property_id: propertyId, owner_client_id: ownerClientId, internal_notes: internalNotes } as never);
+    const realAddress = String(form.get("real_address") ?? "") || null;
+    await supabase.from("property_private_details").upsert({
+      property_id: propertyId,
+      owner_client_id: ownerClientId,
+      internal_notes: internalNotes,
+      real_address: realAddress,
+    } as never);
 
     if (files && files.length > 0) {
       for (let i = 0; i < files.length; i++) {
@@ -194,7 +204,7 @@ export default function PropertyForm({
           <textarea name="description" rows={5} defaultValue={property?.description ?? ""} className="input" />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Κατηγορία">
             <select
               name="category"
@@ -225,7 +235,7 @@ export default function PropertyForm({
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Διαθέσιμο προς">
             <select name="listing_type" required defaultValue={property?.listing_type} className="input">
               <option value="sale">Πώληση</option>
@@ -244,7 +254,7 @@ export default function PropertyForm({
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="Τιμή (€)">
             <input name="price" type="number" min="0" required defaultValue={property?.price} className="input" />
           </Field>
@@ -257,13 +267,13 @@ export default function PropertyForm({
               className="input"
             />
           </Field>
-          <label className="mt-6 flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-ink/70">
+          <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-ink/70 sm:mt-6">
             <input type="checkbox" name="price_negotiable" defaultChecked={property?.price_negotiable} />
             Τιμή συζητήσιμη
           </label>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="Εμβαδόν (m²)">
             <input name="area_sqm" type="number" min="0" defaultValue={property?.area_sqm ?? ""} className="input" />
           </Field>
@@ -279,25 +289,16 @@ export default function PropertyForm({
           <Field label="Υπνοδωμάτια">
             <input name="bedrooms" type="number" min="0" defaultValue={property?.bedrooms ?? ""} className="input" />
           </Field>
-          <Field label="Μπάνια">
-            <input
-              name="bathrooms"
-              type="number"
-              min="0"
-              defaultValue={property?.bathrooms ?? ""}
-              className="input"
-            />
-          </Field>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="Έτος κατασκευής">
             <input name="year_built" type="number" defaultValue={property?.year_built ?? ""} className="input" />
           </Field>
           <Field label="Διαθέσιμο από">
             <input name="available_from" type="date" defaultValue={property?.available_from ?? ""} className="input" />
           </Field>
-          <label className="mt-6 flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-ink/70">
+          <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-ink/70 sm:mt-6">
             <input type="checkbox" name="currently_rented" defaultChecked={property?.currently_rented} />
             Μισθωμένο
           </label>
@@ -307,18 +308,66 @@ export default function PropertyForm({
           <input name="code" defaultValue={property?.code ?? ""} className="input" />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <Field label="Διεύθυνση (εμφανίζεται στους πελάτες)">
+          <input name="address" defaultValue={property?.address ?? ""} className="input" placeholder="π.χ. κοντά σε Πλατεία Αριστοτέλους" />
+        </Field>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="Περιοχή">
-            <input name="region" defaultValue={property?.region ?? ""} className="input" placeholder="π.χ. Καλαμαριά" />
-          </Field>
-          <Field label="Διεύθυνση">
-            <input name="address" defaultValue={property?.address ?? ""} className="input" />
+            <select
+              name="region"
+              value={region}
+              onChange={(e) => {
+                setRegion(e.target.value);
+                setMunicipality("");
+              }}
+              className="input"
+            >
+              <option value="">—</option>
+              {regionNames().map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="Δήμος">
-            <input name="municipality" defaultValue={property?.municipality ?? ""} className="input" />
+            {municipalityOptions.length > 0 ? (
+              <select name="municipality" value={municipality} onChange={(e) => setMunicipality(e.target.value)} className="input">
+                <option value="">—</option>
+                {municipalityOptions.map((m) => (
+                  <option key={m.name} value={m.name}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                name="municipality"
+                defaultValue={property?.municipality ?? ""}
+                className="input"
+                placeholder="Ελεύθερο κείμενο"
+              />
+            )}
           </Field>
           <Field label="Γειτονιά">
-            <input name="neighborhood" defaultValue={property?.neighborhood ?? ""} className="input" />
+            {neighborhoodOptions.length > 0 ? (
+              <select name="neighborhood" key={municipality} defaultValue={property?.neighborhood ?? ""} className="input">
+                <option value="">—</option>
+                {neighborhoodOptions.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                name="neighborhood"
+                defaultValue={property?.neighborhood ?? ""}
+                className="input"
+                placeholder="Ελεύθερο κείμενο"
+              />
+            )}
           </Field>
         </div>
       </div>
@@ -329,8 +378,13 @@ export default function PropertyForm({
         return (
           <div key={group.title} className="border-t border-ink/10 pt-6">
             <h2 className="font-mono text-xs uppercase tracking-wide text-clay">{group.title}</h2>
-            {others.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3">
+            {(others.length > 0 || group.title === "Χώροι") && (
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                {group.title === "Χώροι" && (
+                  <Field label="Μπάνια">
+                    <input name="bathrooms" type="number" min="0" defaultValue={property?.bathrooms ?? ""} className="input" />
+                  </Field>
+                )}
                 {others.map((f) => (
                   <DetailInput key={f.key} field={f} defaultValue={details[f.key]} />
                 ))}
@@ -350,6 +404,9 @@ export default function PropertyForm({
       <div className="border-t border-ink/10 pt-6">
         <h2 className="font-mono text-xs uppercase tracking-wide text-clay">Ιδιωτικά (μόνο για το γραφείο)</h2>
         <div className="mt-4 space-y-4">
+          <Field label="Πραγματική διεύθυνση (δεν εμφανίζεται ποτέ δημόσια)">
+            <input name="real_address" defaultValue={privateDetails?.real_address ?? ""} className="input" />
+          </Field>
           <Field label="Προφίλ ιδιοκτήτη">
             <select name="owner_client_id" defaultValue={privateDetails?.owner_client_id ?? ""} className="input">
               <option value="">—</option>
@@ -369,7 +426,7 @@ export default function PropertyForm({
       <div className="border-t border-ink/10 pt-6">
         <h2 className="font-mono text-xs uppercase tracking-wide text-clay">Φωτογραφίες</h2>
         {existingImages.length > 0 && (
-          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {existingImages.map((img) => (
               <div key={img.id} className="group relative aspect-square overflow-hidden rounded-sm bg-ink/10">
                 <Image src={propertyImageUrl(img.storage_path)} alt="" fill className="object-cover" />

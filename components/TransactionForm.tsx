@@ -102,7 +102,7 @@ export default function TransactionForm({
           </select>
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Ποσό (€)">
             <input
               name="amount"
@@ -129,7 +129,7 @@ export default function TransactionForm({
           <textarea name="description" rows={3} defaultValue={transaction?.description ?? ""} className="input" />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Σχετικό ακίνητο (προαιρετικό)">
             <select name="property_id" defaultValue={transaction?.property_id ?? ""} className="input">
               <option value="">—</option>
