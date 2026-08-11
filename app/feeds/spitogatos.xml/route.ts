@@ -24,6 +24,13 @@ function escapeXml(value: string) {
     .replace(/'/g, "&apos;");
 }
 
+// CDATA is more forgiving than entity-escaping for free-text fields (long
+// descriptions with quotes, line breaks, etc.) — the one thing it can't
+// contain literally is "]]>", so that gets split across two sections.
+function cdata(value: string) {
+  return `<![CDATA[${value.replace(/]]>/g, "]]]]><![CDATA[>")}]]>`;
+}
+
 export async function GET() {
   const supabase = createClient();
 
@@ -62,15 +69,15 @@ export async function GET() {
       return `
   <property>
     <id>${p.id}</id>
-    <title>${escapeXml(p.title)}</title>
-    <description>${escapeXml(p.description ?? "")}</description>
+    <title>${cdata(p.title)}</title>
+    <description>${cdata(p.description ?? "")}</description>
     <type>${p.category}${p.subcategory ? `/${p.subcategory}` : ""}</type>
     <transaction>${p.listing_type}</transaction>
     <price>${p.price}</price>
     <area>${p.area_sqm ?? ""}</area>
     <bedrooms>${p.bedrooms ?? ""}</bedrooms>
-    <region>${escapeXml(p.region ?? "")}</region>
-    <address>${escapeXml(p.address ?? "")}</address>
+    <region>${cdata(p.region ?? "")}</region>
+    <address>${cdata(p.address ?? "")}</address>
     <url>${SITE_URL}/properties/${p.slug}</url>
     <images>${imageTags}</images>
   </property>`;

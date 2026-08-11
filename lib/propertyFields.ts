@@ -153,6 +153,11 @@ export const ORIENTATION_OPTIONS = [
   "Νοτιοδυτικός",
 ].map((v) => ({ value: v, label: v }));
 
+export const HEATING_SYSTEM_OPTIONS = ["Αυτόνομη", "Κεντρική", "Ατομική θέρμανση", "Χωρίς θέρμανση"].map((v) => ({
+  value: v,
+  label: v,
+}));
+
 export const ACCESS_FROM_OPTIONS = [
   "Άσφαλτο",
   "Πεζόδρομο",
@@ -181,7 +186,7 @@ export const DETAIL_GROUPS: DetailGroup[] = [
     title: "Ενέργεια",
     fields: [
       { key: "energy_class", label: "Ενεργειακή κλάση", type: "select", options: ENERGY_CLASSES },
-      { key: "heating_system", label: "Σύστημα θέρμανσης", type: "text" },
+      { key: "heating_system", label: "Σύστημα θέρμανσης", type: "select", options: HEATING_SYSTEM_OPTIONS },
       { key: "air_conditioning", label: "Κλιματισμός", type: "boolean" },
       { key: "solar_water_heater", label: "Ηλιακός θερμοσίφωνας", type: "boolean" },
       { key: "underfloor_heating", label: "Ενδοδαπέδια θέρμανση", type: "boolean" },

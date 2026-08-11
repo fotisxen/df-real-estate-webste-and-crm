@@ -3,11 +3,12 @@ import { propertyImageUrl } from "@/lib/storage";
 import { CATEGORIES, DETAIL_GROUPS, subcategoriesFor, hasValue } from "@/lib/propertyFields";
 import type { Property, PropertyImage } from "@/types/database";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import T from "@/components/T";
 import Reveal from "@/components/Reveal";
+import PropertyGallery from "@/components/PropertyGallery";
 import { SITE_URL } from "@/lib/site";
+
 
 const categoryLabel = Object.fromEntries(CATEGORIES.map((c) => [c.value, c.label]));
 
@@ -109,29 +110,17 @@ export default async function PropertyPage({ params }: { params: { slug: string 
         {property.region ? ` · ${property.region}` : ""}
       </p>
       <h1 className="mt-2 max-w-3xl text-4xl md:text-5xl">{property.title}</h1>
-      {property.code && <p className="mt-1 font-mono text-xs text-ink/40">Κωδικός: {property.code}</p>}
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 font-mono text-xs text-ink/40">
+        {property.code && <span>Κωδικός: {property.code}</span>}
+        {property.address && <span>{property.address}</span>}
+      </div>
 
-      {images.length > 0 && (
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          {images.map((img, i) => (
-            <div
-              key={img.id}
-              className={`relative aspect-[4/3] overflow-hidden rounded-sm bg-ink/10 ${
-                i === 0 ? "sm:col-span-2 sm:aspect-[16/9]" : ""
-              }`}
-            >
-              <Image
-                src={propertyImageUrl(img.storage_path)}
-                alt={img.alt_text ?? property.title}
-                fill
-                sizes="(min-width: 640px) 50vw, 100vw"
-                className="object-cover"
-                priority={i === 0}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      <PropertyGallery
+        images={images.map((img) => ({
+          src: propertyImageUrl(img.storage_path),
+          alt: img.alt_text ?? property.title,
+        }))}
+      />
 
       <div className="mt-10 grid gap-10 md:grid-cols-[2fr,1fr]">
         <div>
