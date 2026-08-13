@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { effectiveArea } from "@/lib/areas";
 import Reveal from "@/components/Reveal";
 import T from "@/components/T";
 import type { Metadata } from "next";
@@ -16,18 +17,17 @@ export default async function AreasPage() {
   const supabase = createClient();
   const { data } = await supabase
     .from("properties")
-    .select("region, price")
+    .select("region, municipality, neighborhood")
     .eq("status", "available")
-    .eq("published", true)
-    .not("region", "is", null);
+    .eq("published", true);
 
-  const rows = (data ?? []) as { region: string | null; price: number }[];
+  const rows = (data ?? []) as { region: string | null; municipality: string | null; neighborhood: string | null }[];
 
   const byRegion = new Map<string, number>();
   for (const row of rows) {
-    const region = row.region?.trim();
-    if (!region) continue;
-    byRegion.set(region, (byRegion.get(region) ?? 0) + 1);
+    const area = effectiveArea(row);
+    if (!area) continue;
+    byRegion.set(area, (byRegion.get(area) ?? 0) + 1);
   }
 
   const areas = Array.from(byRegion.entries())

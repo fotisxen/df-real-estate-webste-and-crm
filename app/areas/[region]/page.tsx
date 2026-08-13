@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { propertyImageUrl } from "@/lib/storage";
+import { effectiveArea } from "@/lib/areas";
 import PropertyCard from "@/components/PropertyCard";
 import Reveal from "@/components/Reveal";
 import T from "@/components/T";
@@ -16,9 +17,11 @@ async function getAreaProperties(region: string) {
     .select("*")
     .eq("status", "available")
     .eq("published", true)
-    .ilike("region", region)
     .order("created_at", { ascending: false });
-  return (data ?? []) as Property[];
+  // Matched in JS rather than a SQL filter: the area label can be a
+  // region, municipality, or neighborhood (see effectiveArea), and some
+  // stored values contain commas that would break a naive OR filter string.
+  return ((data ?? []) as Property[]).filter((p) => effectiveArea(p) === region);
 }
 
 export async function generateMetadata({

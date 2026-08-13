@@ -3,6 +3,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { propertyImageUrl } from "@/lib/storage";
 import { getAllArticles } from "@/lib/contentful";
+import { effectiveArea } from "@/lib/areas";
 import Hero from "@/components/Hero";
 import PropertyCard from "@/components/PropertyCard";
 import Reveal from "@/components/Reveal";
@@ -54,25 +55,23 @@ export default async function HomePage() {
       .eq("status", "available"),
     supabase
       .from("properties")
-      .select("region")
+      .select("region, municipality, neighborhood")
       .eq("status", "available")
-      .eq("published", true)
-      .not("region", "is", null),
+      .eq("published", true),
     getAllArticles(),
   ]);
 
   const properties = (featured ?? []) as Property[];
 
   const areaCounts = new Map<string, number>();
-  for (const row of (regionRows ?? []) as { region: string | null }[]) {
-    const region = row.region?.trim();
-    if (!region) continue;
-    areaCounts.set(region, (areaCounts.get(region) ?? 0) + 1);
+  for (const row of (regionRows ?? []) as { region: string | null; municipality: string | null; neighborhood: string | null }[]) {
+    const area = effectiveArea(row);
+    if (!area) continue;
+    areaCounts.set(area, (areaCounts.get(area) ?? 0) + 1);
   }
   const topAreas = Array.from(areaCounts.entries())
     .map(([region, count]) => ({ region, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 6);
+    .sort((a, b) => b.count - a.count);
 
   const latestArticles = articles.slice(0, 3);
 
@@ -199,14 +198,14 @@ export default async function HomePage() {
               <T k="home.areas.viewAll" />
             </a>
           </Reveal>
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
             {topAreas.map((area, i) => (
-              <Reveal key={area.region} delay={Math.min(i, 5) * 0.06}>
+              <Reveal key={area.region} delay={Math.min(i, 5) * 0.06} className="shrink-0 snap-start">
                 <Link
                   href={`/areas/${encodeURIComponent(area.region)}`}
-                  className="group block rounded-sm border border-ink/10 bg-limestone2 p-4 text-center transition-shadow hover:shadow-xl"
+                  className="group flex h-36 w-40 flex-col items-center justify-center rounded-sm border border-ink/10 bg-limestone2 p-4 text-center transition-shadow hover:shadow-xl"
                 >
-                  <span className="block font-display text-lg leading-snug">{area.region}</span>
+                  <span className="line-clamp-3 font-display text-lg leading-snug">{area.region}</span>
                   <span className="mt-1 block font-mono text-xs uppercase tracking-wide text-ink/50">
                     {area.count} <T k={area.count === 1 ? "areas.property" : "areas.properties"} />
                   </span>

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
 import { getAllArticles } from "@/lib/contentful";
+import { effectiveArea } from "@/lib/areas";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -11,13 +12,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const { data: regionRows } = await supabase
     .from("properties")
-    .select("region")
+    .select("region, municipality, neighborhood")
     .eq("status", "available")
-    .eq("published", true)
-    .not("region", "is", null);
+    .eq("published", true);
   const regions = new Set<string>();
-  for (const row of (regionRows ?? []) as { region: string | null }[]) {
-    if (row.region?.trim()) regions.add(row.region.trim());
+  for (const row of (regionRows ?? []) as { region: string | null; municipality: string | null; neighborhood: string | null }[]) {
+    const area = effectiveArea(row);
+    if (area) regions.add(area);
   }
 
   const base = SITE_URL;
