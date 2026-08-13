@@ -78,6 +78,38 @@ alter table clients add column if not exists address text;
 -- a client "is an owner" simply by having a property linked to them.
 alter table clients drop column if exists is_owner;
 
+-- Roles/tags for a client (property owner, contractor, prospective buyer,
+-- prospective tenant, ...) — see lib/clientFields.ts for the option list.
+-- A client can have several at once.
+alter table clients add column if not exists tags text[] not null default '{}';
+
+-- Many-to-many: which listed properties a client has been shown / has
+-- expressed interest in / has viewed. Distinct from ownership
+-- (property_private_details.owner_client_id) and from the free-text
+-- clients.interested_in ("looking for a 3br near Kalamaria"). Editable
+-- from both the client form and the property form.
+create table if not exists client_property_interest (
+  client_id uuid not null references clients(id) on delete cascade,
+  property_id uuid not null references properties(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (client_id, property_id)
+);
+
+create index if not exists client_property_interest_property_id_idx on client_property_interest(property_id);
+
+alter table client_property_interest enable row level security;
+
+drop policy if exists "only agents can read client_property_interest" on client_property_interest;
+create policy "only agents can read client_property_interest"
+  on client_property_interest for select
+  using (auth.role() = 'authenticated');
+
+drop policy if exists "only agents can modify client_property_interest" on client_property_interest;
+create policy "only agents can modify client_property_interest"
+  on client_property_interest for all
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
 -- ---------------------------------------------------------------------
 -- updated_at trigger for properties
 -- ---------------------------------------------------------------------

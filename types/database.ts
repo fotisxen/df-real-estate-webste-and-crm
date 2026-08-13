@@ -80,7 +80,17 @@ export interface Client {
   address: string | null;
   notes: string | null;
   interested_in: string | null;
+  tags: string[];
   agent_id: string | null;
+  created_at: string;
+}
+
+// Many-to-many: a client shown/interested-in/viewed a specific listed
+// property. Distinct from ownership and from the free-text
+// clients.interested_in field.
+export interface ClientPropertyInterest {
+  client_id: string;
+  property_id: string;
   created_at: string;
 }
 
@@ -131,6 +141,11 @@ export interface Database {
         Row: Transaction;
         Insert: Partial<Transaction> & Pick<Transaction, "type" | "category" | "amount">;
         Update: Partial<Transaction>;
+      };
+      client_property_interest: {
+        Row: ClientPropertyInterest;
+        Insert: Partial<ClientPropertyInterest> & Pick<ClientPropertyInterest, "client_id" | "property_id">;
+        Update: Partial<ClientPropertyInterest>;
       };
     };
     Views: Record<string, never>;

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { CLIENT_TAGS } from "@/lib/clientFields";
 import type { Client, Property } from "@/types/database";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -18,17 +19,20 @@ export default function ClientForm({
   mode,
   client,
   linkedProperties,
+  interestedProperties,
   allProperties,
 }: {
   mode: "create" | "edit";
   client?: Client;
   linkedProperties?: Property[];
+  interestedProperties?: Property[];
   allProperties?: Property[];
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ownedIds = new Set((linkedProperties ?? []).map((p) => p.id));
+  const interestedIds = new Set((interestedProperties ?? []).map((p) => p.id));
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -45,6 +49,7 @@ export default function ClientForm({
       address: String(form.get("address") ?? "") || null,
       interested_in: String(form.get("interested_in") ?? "") || null,
       notes: String(form.get("notes") ?? "") || null,
+      tags: form.getAll("tags").map(String),
     };
 
     let clientId = client?.id;
@@ -60,18 +65,33 @@ export default function ClientForm({
     }
     clientId = (saved as Client).id;
 
-    const checkedIds = form.getAll("owned_property_ids").map(String);
-    const toClear = [...ownedIds].filter((id) => !checkedIds.includes(id));
-    if (toClear.length > 0) {
+    const checkedOwnedIds = form.getAll("owned_property_ids").map(String);
+    const toClearOwner = [...ownedIds].filter((id) => !checkedOwnedIds.includes(id));
+    if (toClearOwner.length > 0) {
       await supabase
         .from("property_private_details")
         .update({ owner_client_id: null } as never)
-        .in("property_id", toClear);
+        .in("property_id", toClearOwner);
     }
-    for (const propertyId of checkedIds) {
+    for (const propertyId of checkedOwnedIds) {
       await supabase
         .from("property_private_details")
         .upsert({ property_id: propertyId, owner_client_id: clientId } as never);
+    }
+
+    const checkedInterestedIds = form.getAll("interested_property_ids").map(String);
+    const toClearInterest = [...interestedIds].filter((id) => !checkedInterestedIds.includes(id));
+    if (toClearInterest.length > 0) {
+      await supabase
+        .from("client_property_interest")
+        .delete()
+        .eq("client_id", clientId)
+        .in("property_id", toClearInterest);
+    }
+    if (checkedInterestedIds.length > 0) {
+      await supabase.from("client_property_interest").upsert(
+        checkedInterestedIds.map((propertyId) => ({ client_id: clientId, property_id: propertyId })) as never,
+      );
     }
 
     setSaving(false);
@@ -99,6 +119,17 @@ export default function ClientForm({
           <input name="address" defaultValue={client?.address ?? ""} className="input" />
         </Field>
 
+        <Field label="Ιδιότητες">
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {CLIENT_TAGS.map((tag) => (
+              <label key={tag} className="flex items-center gap-2 text-sm normal-case text-ink/80">
+                <input type="checkbox" name="tags" value={tag} defaultChecked={client?.tags?.includes(tag)} />
+                {tag}
+              </label>
+            ))}
+          </div>
+        </Field>
+
         <Field label="Ενδιαφέρεται για">
           <input
             name="interested_in"
@@ -117,6 +148,32 @@ export default function ClientForm({
           {allProperties && allProperties.length > 0 ? (
             <Field label="Ακίνητα">
               <select name="owned_property_ids" multiple size={6} defaultValue={[...ownedIds]} className="input">
+                {allProperties.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.title}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs normal-case text-ink/50">
+                Κρατήστε Ctrl (ή Cmd σε Mac) πατημένο για επιλογή πολλών ακινήτων.
+              </p>
+            </Field>
+          ) : (
+            <p className="mt-3 text-sm text-ink/50">Δεν υπάρχουν ακόμη ακίνητα.</p>
+          )}
+        </div>
+
+        <div className="border-t border-ink/10 pt-6">
+          <h2 className="font-mono text-xs uppercase tracking-wide text-clay">Ακίνητα που είδε / ενδιαφέρθηκε</h2>
+          {allProperties && allProperties.length > 0 ? (
+            <Field label="Ακίνητα">
+              <select
+                name="interested_property_ids"
+                multiple
+                size={6}
+                defaultValue={[...interestedIds]}
+                className="input"
+              >
                 {allProperties.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.title}

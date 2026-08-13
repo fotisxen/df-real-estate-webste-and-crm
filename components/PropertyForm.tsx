@@ -68,12 +68,14 @@ export default function PropertyForm({
   privateDetails,
   images,
   clients,
+  interestedClientIds,
 }: {
   mode: "create" | "edit";
   property?: Property;
   privateDetails?: PropertyPrivateDetails | null;
   images?: PropertyImage[];
   clients: { id: string; full_name: string }[];
+  interestedClientIds?: string[];
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -84,6 +86,7 @@ export default function PropertyForm({
   const [region, setRegion] = useState(property?.region ?? "");
   const [municipality, setMunicipality] = useState(property?.municipality ?? "");
   const details = property?.details ?? {};
+  const interestedIds = new Set(interestedClientIds ?? []);
 
   const municipalityOptions = municipalitiesFor(region);
   const neighborhoodOptions = neighborhoodsFor(region, municipality);
@@ -175,6 +178,21 @@ export default function PropertyForm({
       internal_notes: internalNotes,
       real_address: realAddress,
     } as never);
+
+    const checkedInterestedClientIds = form.getAll("interested_client_ids").map(String);
+    const toClearInterest = [...interestedIds].filter((id) => !checkedInterestedClientIds.includes(id));
+    if (toClearInterest.length > 0) {
+      await supabase
+        .from("client_property_interest")
+        .delete()
+        .eq("property_id", propertyId!)
+        .in("client_id", toClearInterest);
+    }
+    if (checkedInterestedClientIds.length > 0) {
+      await supabase.from("client_property_interest").upsert(
+        checkedInterestedClientIds.map((clientId) => ({ client_id: clientId, property_id: propertyId! })) as never,
+      );
+    }
 
     if (files && files.length > 0) {
       for (let i = 0; i < files.length; i++) {
@@ -420,6 +438,20 @@ export default function PropertyForm({
           <Field label="Σημειώσεις">
             <textarea name="internal_notes" rows={3} defaultValue={privateDetails?.internal_notes ?? ""} className="input" />
           </Field>
+          {clients.length > 0 && (
+            <Field label="Πελάτες που το είδαν / ενδιαφέρθηκαν">
+              <select name="interested_client_ids" multiple size={6} defaultValue={[...interestedIds]} className="input">
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.full_name}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs normal-case text-ink/50">
+                Κρατήστε Ctrl (ή Cmd σε Mac) πατημένο για επιλογή πολλών πελατών.
+              </p>
+            </Field>
+          )}
         </div>
       </div>
 
