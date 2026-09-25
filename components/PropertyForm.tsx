@@ -98,6 +98,18 @@ export default function PropertyForm({
     setExistingImages((prev) => prev.filter((i) => i.id !== img.id));
   }
 
+  // Reordering only changes local state; the new order is persisted to the
+  // `position` column when the form is saved.
+  function moveImage(from: number, to: number) {
+    setExistingImages((prev) => {
+      if (to < 0 || to >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
@@ -192,6 +204,12 @@ export default function PropertyForm({
       await supabase.from("client_property_interest").upsert(
         checkedInterestedClientIds.map((clientId) => ({ client_id: clientId, property_id: propertyId! })) as never,
       );
+    }
+
+    for (let i = 0; i < existingImages.length; i++) {
+      if (existingImages[i].position !== i) {
+        await supabase.from("property_images").update({ position: i } as never).eq("id", existingImages[i].id);
+      }
     }
 
     if (files && files.length > 0) {
@@ -459,9 +477,14 @@ export default function PropertyForm({
         <h2 className="font-mono text-xs uppercase tracking-wide text-clay">Φωτογραφίες</h2>
         {existingImages.length > 0 && (
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {existingImages.map((img) => (
+            {existingImages.map((img, index) => (
               <div key={img.id} className="group relative aspect-square overflow-hidden rounded-sm bg-ink/10">
                 <Image src={propertyImageUrl(img.storage_path)} alt="" fill className="object-cover" />
+                {index === 0 && (
+                  <span className="absolute left-1 top-1 rounded-full bg-clay px-2 py-0.5 font-mono text-[10px] uppercase text-limestone">
+                    Πρώτη
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => handleDeleteImage(img)}
@@ -469,9 +492,43 @@ export default function PropertyForm({
                 >
                   Διαγραφή
                 </button>
+                <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-1 font-mono text-[10px] text-limestone">
+                  <button
+                    type="button"
+                    onClick={() => moveImage(index, index - 1)}
+                    disabled={index === 0}
+                    aria-label="Μετακίνηση αριστερά"
+                    className="rounded-full bg-ink/80 px-2 py-0.5 disabled:opacity-30"
+                  >
+                    ←
+                  </button>
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => moveImage(index, 0)}
+                      className="rounded-full bg-ink/80 px-2 py-0.5 uppercase"
+                    >
+                      Κύρια
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => moveImage(index, index + 1)}
+                    disabled={index === existingImages.length - 1}
+                    aria-label="Μετακίνηση δεξιά"
+                    className="rounded-full bg-ink/80 px-2 py-0.5 disabled:opacity-30"
+                  >
+                    →
+                  </button>
+                </div>
               </div>
             ))}
           </div>
+        )}
+        {existingImages.length > 1 && (
+          <p className="mt-2 text-xs text-ink/50">
+            Η πρώτη φωτογραφία εμφανίζεται ως κύρια. Η νέα σειρά αποθηκεύεται με το «Αποθήκευση ακινήτου».
+          </p>
         )}
         <div className="mt-4">
           <input type="file" accept="image/*" multiple onChange={(e) => setFiles(e.target.files)} className="input" />
