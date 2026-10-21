@@ -297,3 +297,31 @@ create policy "only agents can modify transactions"
   on transactions for all
   using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
+
+-- Data API grants. From 30 October 2026 Supabase no longer grants new tables in
+-- "public" to the API roles automatically, so a fresh setup (new project, preview
+-- branch, `supabase db reset`) needs these. RLS still decides which rows each role sees.
+-- anon only gets what an RLS policy opens to visitors who are not signed in.
+
+grant select, insert, update, delete on public.agents to authenticated;
+grant select, insert, update, delete on public.agents to service_role;
+
+grant select on public.properties to anon;
+grant select, insert, update, delete on public.properties to authenticated;
+grant select, insert, update, delete on public.properties to service_role;
+
+grant select on public.property_images to anon;
+grant select, insert, update, delete on public.property_images to authenticated;
+grant select, insert, update, delete on public.property_images to service_role;
+
+grant select, insert, update, delete on public.clients to authenticated;
+grant select, insert, update, delete on public.clients to service_role;
+
+grant select, insert, update, delete on public.client_property_interest to authenticated;
+grant select, insert, update, delete on public.client_property_interest to service_role;
+
+grant select, insert, update, delete on public.property_private_details to authenticated;
+grant select, insert, update, delete on public.property_private_details to service_role;
+
+grant select, insert, update, delete on public.transactions to authenticated;
+grant select, insert, update, delete on public.transactions to service_role;
